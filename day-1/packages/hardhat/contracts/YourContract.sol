@@ -14,7 +14,7 @@ import "hardhat/console.sol";
  */
 contract YourContract {
 	// State Variables
-	address public immutable owner;
+	address public owner;
 	string public greeting = "Building Unstoppable Apps!!!";
 	bool public premium = false;
 	uint256 public totalCounter = 0;
@@ -27,6 +27,8 @@ contract YourContract {
 		bool premium,
 		uint256 value
 	);
+
+	event OwnerChange(address indexed previousOwner, address indexed newOwner);
 
 	// Constructor: Called once on contract deployment
 	// Check packages/hardhat/deploy/00_deploy_your_contract.ts
@@ -48,6 +50,9 @@ contract YourContract {
 	 * @param _newGreeting (string memory) - new greeting to save on the contract
 	 */
 	function setGreeting(string memory _newGreeting) public payable {
+		// 1 ether == 10 ** 18 wei
+		require(msg.value >= 1000000000000000000, "Invalid paid amount");
+
 		// Print data to the hardhat chain console. Remove when deploying to a live network.
 		console.log(
 			"Setting new greeting '%s' from %s",
@@ -69,6 +74,11 @@ contract YourContract {
 
 		// emit: keyword used to trigger an event
 		emit GreetingChange(msg.sender, _newGreeting, msg.value > 0, msg.value);
+	}
+
+	function setOwner(address _newOwner) public isOwner {
+		owner = _newOwner;
+		emit OwnerChange(msg.sender, _newOwner);
 	}
 
 	/**
